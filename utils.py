@@ -18,7 +18,7 @@ def get_mask_index(filename, mask_object):
     with open(filename) as file:
         # masks_grayscale = json.load(file)["header"]["masks"]
         masks_grayscale = json.load(file)["masks_grayscale"]
-    makout = {}
+    out = {}
     for mo in mask_object:
         out[mo] = []
     # for o, idx in masks_grayscale.items():
