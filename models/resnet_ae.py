@@ -32,6 +32,7 @@ class Resnet_ae(nn.Module, Model):
         else:
             Norm = nn.BatchNorm2d
         # define model
+        self.nc_in = opt.nc_in
         self.nc_out = opt.nc_out
         self.latentDim = opt.latentDim
         self.input_len, self.target_len = opt.input_len, opt.target_len
@@ -117,8 +118,8 @@ class Resnet_ae(nn.Module, Model):
             self.maskPredictor.cuda()
 
     def step(self, batch, set_):
-        self.input.data.copy_(batch[0])
-        self.target.data.copy_(batch[1])
+        self.input.data.copy_(batch[0].view(-1, self.nc_in, 64, 64))
+        self.target.data.copy_(batch[1].view(-1, self.nc_out, 64, 64))
         if self.maskPredictor:
             self.target = self.maskPredictor(self.target).detach()
         self.out = self.forward(self.input)
@@ -127,15 +128,16 @@ class Resnet_ae(nn.Module, Model):
             self.zero_grad()
             err.backward()
             self.optimizer.step()
-        return {'err': err.data[0]}
+        # return {'err': err.data[0]}
+        return {'err': err.item()}
 
     def output(self):
         d1, d2, d3 = self.out.size(1), self.out.size(2), self.out.size(3)
         return self.out.view(-1, self.target_len, d1, d2, d3).data
 
     def score(self, batch):
-        self.input.data.copy_(batch[0])
-        self.target.data.copy_(batch[1])
+        self.input.data.copy_(batch[0].view(-1, self.nc_in, 64, 64))
+        self.target.data.copy_(batch[1].view(-1, self.nc_out, 64, 64))
         if self.maskPredictor:
             self.target = self.maskPredictor(self.target).detach()
         self.out = self.forward(self.input)

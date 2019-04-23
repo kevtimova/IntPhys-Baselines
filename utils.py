@@ -16,11 +16,13 @@ def get_mask_index(filename, mask_object):
     mask_object: name of the object to get the mask index of
     """
     with open(filename) as file:
-        masks_grayscale = json.load(file)["header"]["masks"]
-    out = {}
+        # masks_grayscale = json.load(file)["header"]["masks"]
+        masks_grayscale = json.load(file)["masks_grayscale"]
+    makout = {}
     for mo in mask_object:
         out[mo] = []
-    for o, idx in masks_grayscale.items():
+    # for o, idx in masks_grayscale.items():
+    for idx, o in masks_grayscale:
         for mo in mask_object:
             if mo in o:
                 out[mo].append(idx)

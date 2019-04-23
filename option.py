@@ -10,7 +10,7 @@ def make(parser):
     parser.add_argument('--model', default='Resnet_ae', help='model to train')
     parser.add_argument('--list', type=str, default='lists/intphys2017')
     parser.add_argument('--count', type=int, default=15000)
-    parser.add_argument('--pattern', default='/mnt/20170407/train/%05d_block_O1_train',)
+    parser.add_argument('--pattern', default='block_O1_train',)
     parser.add_argument('--checkpoint', default='./checkpoints', help='path to checkpoint folder')
     parser.add_argument('--n_frames', type=int, default=100, help='numbers of frames in videos')
     parser.add_argument('--bsz', type=int, default=100, help='batch size')

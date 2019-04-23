@@ -41,7 +41,8 @@ class IntPhys(torch.utils.data.Dataset):
                     ri = random.randint(0, len(self.paths) - 1)
                     v = self.paths[ri].decode('UTF-8')
                 else:
-                    v = os.path.join(video_path, c)
+                    # v = os.path.join(video_path, c)
+                    v = video_path
                 if f == 'x' or f == 'y':
                     f = random.randint(1, self.opt.n_frames) - start
                     assert not self.test
@@ -71,10 +72,11 @@ class IntPhys(torch.utils.data.Dataset):
                 return loadDiff('depth', 1, start, seq, 'bilinear', c)
             elif x == 'mask':
                 mask_value = utils.get_mask_index(
-                    os.path.join(video_path, str(c), 'status.json'),
+                    # os.path.join(video_path, str(c), 'status.json'),
+                    os.path.join(video_path, 'status.json'),
                     self.opt.mask_object
                 )
-                raw_mask = loadDiff('masks', 1, start, seq, 'nearest', c)
+                raw_mask = loadDiff('mask', 1, start, seq, 'nearest', c)
                 mask = raw_mask.astype(int)
                 out = [np.ones(mask.shape, dtype=bool)]
                 for o in self.opt.mask_object:
