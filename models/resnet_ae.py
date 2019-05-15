@@ -54,15 +54,18 @@ class Resnet_ae(nn.Module, Model):
             nn.Conv2d(128,opt.nf*4, 3, 1, 1),
             Norm(opt.nf*4),
             nn.ReLU(),
-            nn.UpsamplingNearest2d(scale_factor=2),
+            #nn.UpsamplingNearest2d(scale_factor=2),
+            nn.Upsample(mode='bilinear', scale_factor=2),
             nn.Conv2d(opt.nf*4,opt.nf*2, 3, 1, 1),
             Norm(opt.nf*2),
             nn.ReLU(),
-            nn.UpsamplingNearest2d(scale_factor=2),
+            # nn.UpsamplingNearest2d(scale_factor=2),
+            nn.Upsample(mode='bilinear', scale_factor=2),
             nn.Conv2d(opt.nf*2,opt.nf, 3, 1, 1),
             Norm(opt.nf),
             nn.ReLU(),
-            nn.UpsamplingNearest2d(scale_factor=2),
+            # nn.UpsamplingNearest2d(scale_factor=2),
+            nn.Upsample(mode='bilinear', scale_factor=2),
             nn.Conv2d(opt.nf, opt.target_len * opt.nc_out, 3, 1, 1),
             nn.Sigmoid()
         )
@@ -142,4 +145,5 @@ class Resnet_ae(nn.Module, Model):
             self.target = self.maskPredictor(self.target).detach()
         self.out = self.forward(self.input)
         err = self.criterion.forward(self.out, self.target)
-        return 1 / err.data.item()
+        #return 1 / err.data.item()
+        return err.data.item()

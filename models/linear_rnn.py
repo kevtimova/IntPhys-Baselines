@@ -21,11 +21,12 @@ class Linear_rnn(nn.Module, Model):
         self.input = Variable(self.input)
         self.target = torch.FloatTensor(opt.bsz * opt.target_len, opt.nc_out, 64, 64)
         self.target = Variable(self.target)
-        self.h0 = Variable(torch.randn(opt.n_layer, 1, opt.n_hidden))
+        # self.h0 = Variable(torch.randn(opt.n_layer, 1, opt.n_hidden))
+        self.h0 = Variable(torch.randn(opt.n_layer, self.bsz, opt.n_hidden))
         if opt.rnn == 'LSTM':
             self.h0 = (
                 self.h0,
-                Variable(torch.randn(opt.n_layer, 1, opt.n_hidden))
+                Variable(torch.randn(opt.n_layer, self.bsz, opt.n_hidden))
             )
 
         self.criterion = nn.MSELoss()
@@ -57,13 +58,20 @@ class Linear_rnn(nn.Module, Model):
             self.h0 = self.h0.cuda()
 
     def step(self, batch, set_):
-        self.input.data.copy_(batch[0])
-        self.target.data.copy_(batch[1])
+        bs, li, nc, fw, fh = batch[0].shape
+        self.input.data.copy_(batch[0].view(-1, nc, fw, fh))
+        bs, lt, nc, fw, fh = batch[0].shape
+        self.target.data.copy_(batch[1].view(-1, nc, fw, fh))
         x = self.encoder(self.input).detach()
-        x = x.view(-1, self.input_len, self.latentDim)
+        # x = x.view(-1, self.input_len, self.latentDim)
+        # x = x.view(-1, self.target_len, self.latentDim)
+        x = x.view(self.input_len, -1, self.latentDim) # (input_len, batch_size, input_size)
         y = self.encoder(self.target).detach()
-        y = y.view(-1, self.input_len, self.latentDim)
-        self.out, _ = self.forward(x, self.h0)
+        # y = y.view(-1, self.input_len, self.latentDim)
+        # y = y.view(-1, self.target_len, self.latentDim)
+        y = y.view(self.input_len, -1, self.latentDim) # (input_len, batch_size, hidden_size)
+        import ipdb; ipdb.set_trace()
+        self.out, self.h = self.forward(x, self.h0)
         err = self.criterion.forward(self.out, y)
         if set_ == 'train':
             self.zero_grad()
@@ -76,7 +84,7 @@ class Linear_rnn(nn.Module, Model):
         d1, d2, d3 = out.size(1), out.size(2), out.size(3)
         return out.view(-1, self.target_len, d1, d2, d3)
 
-    def load(self, d):
+    def load(self, d, cuda=False):
         for e in d:
             if e[0] == self.__name__:
                 path = d[0][-1]
@@ -87,7 +95,7 @@ class Linear_rnn(nn.Module, Model):
                 print('loading encoder: %s' %path)
                 self.encoder.load_state_dict(
                     utils.filter(
-                        torch.load(path),
+                        torch.load(path, map_location="cuda" if cuda else "cpu"),
                         ['resnet_features', 'encoder']
                     )
                 )
@@ -96,7 +104,7 @@ class Linear_rnn(nn.Module, Model):
                 print('loading decoder: %s' %path)
                 self.decoder.load_state_dict(
                     utils.filter(
-                        torch.load(path),
+                        torch.load(path, map_location="cuda" if cuda else "cpu"),
                         ['decoder', 'deconv']
                     )
                 )
@@ -110,7 +118,7 @@ class Linear_rnn(nn.Module, Model):
             os.path.join(path, '%s_%d.pth' %(self.__name__, epoch))
         )
 
-    def score():
+    def score(self, batch):
         self.input.data.copy_(batch[0])
         self.target.data.copy_(batch[1])
         x = self.encoder(self.input).detach()

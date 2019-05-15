@@ -9,12 +9,12 @@ class Model(object):
         # process one optimization step, from a batch
         pass
 
-    def load(self, d):
+    def load(self, d, cuda=False):
         # must be rewritten if self is not nn.Module
         name = d[0][0] if len(d[0]) > 1 else 'model'
         path = d[0][-1]
         print('loading %s: %s' %(name, path))
-        self.load_state_dict(torch.load(path))
+        self.load_state_dict(torch.load(path, map_location="cuda" if cuda else "cpu"))
 
     def save(self, path, epoch):
         # must be rewritten if self is not nn.Module

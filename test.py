@@ -75,7 +75,6 @@ def process_batch(batch, j, t0):
     j: index of the video
     t0: time when the test started
     """
-
     nbatch = vars(opt)['nbatch_test']
     frame_scores = np.zeros((opt.m, 4))
     d3, d4 = batch[0].size(3), batch[0].size(4)
@@ -102,6 +101,7 @@ def process_batch(batch, j, t0):
         out += ' batch time: %.2fs | test eta: %.2dH%.2dm%.2ds' \
             %(batch_time, eta / (60 * 60), (eta / 60) % 60, eta % 60)
         print(out, end='\r')
+    # Visualize the frame scores
     if opt_test.image_save or opt_test.visdom:
         for c in range(4):
             to_plot = []
@@ -154,6 +154,7 @@ def test(list_name):
         scores_min = np.array(scores_min).mean(0)
     else:
         opt.list = os.path.join(opt_test.list_path, list_name)
+        print(opt.list)
         testLoader = torch.utils.data.DataLoader(
             datasets.IntPhys(opt, 'test'),
             opt.bsz,
@@ -163,6 +164,7 @@ def test(list_name):
         t0 = dt.time()
         for j, batch in enumerate(testLoader, 0):
             frame_scores = process_batch(batch, j, t0)
+            print(frame_scores)
             scores_mean.append(frame_scores.mean(0))
             scores_min.append(frame_scores.min(0))
         scores_mean = np.array(scores_mean)

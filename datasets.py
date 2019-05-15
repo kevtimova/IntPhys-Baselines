@@ -32,6 +32,7 @@ class IntPhys(torch.utils.data.Dataset):
         video_idx = math.floor(index / self.opt.m)
         video_path = self._getpath(video_idx)
         frame_idx = index % self.opt.m
+        # Loads frames with indices: [start + i for i in seq]
         def load(x, nc, start, seq, interp, c):
             out = []
             for j,f in enumerate(seq):

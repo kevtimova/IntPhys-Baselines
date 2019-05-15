@@ -2,7 +2,7 @@ import json
 import random
 import os
 import torch
-#import visdom
+import visdom
 import time
 import sys
 import numpy as np
@@ -16,13 +16,13 @@ def get_mask_index(filename, mask_object):
     mask_object: name of the object to get the mask index of
     """
     with open(filename) as file:
-        # masks_grayscale = json.load(file)["header"]["masks"]
-        masks_grayscale = json.load(file)["masks_grayscale"]
+        masks_grayscale = json.load(file)["header"]["masks"]
+        # masks_grayscale = json.load(file)["masks_grayscale"]
     out = {}
     for mo in mask_object:
         out[mo] = []
-    # for o, idx in masks_grayscale.items():
-    for idx, o in masks_grayscale:
+    for o, idx in masks_grayscale.items():
+    # for idx, o in masks_grayscale:
         for mo in mask_object:
             if mo in o:
                 out[mo].append(idx)

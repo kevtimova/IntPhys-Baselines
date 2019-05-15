@@ -14,7 +14,8 @@ from .resnet_ae import Resnet_ae
 
 def UpSamplingConvolution(nIn, nOut):
     module = nn.Sequential(
-        nn.UpsamplingNearest2d(2),
+        # nn.UpsamplingNearest2d(2),
+        nn.Upsample(mode='bilinear', scale_factor=2),
         nn.Conv2d(nIn, nOut, 3, 1, 1)
     )
     return module
@@ -31,7 +32,7 @@ class netG(nn.Module):
     def __init__(self, opt):
         super(netG, self).__init__()
         self.__name__ = 'netG'
-#        bsz = 1 if test else opt.bsz
+       # bsz = 1 if test else opt.bsz
 #        self.noise = Variable(torch.FloatTensor(bsz, opt.noiseDim, 1, 1))
         self.li = opt.nc_in * opt.input_len
         self.lo = opt.nc_out * opt.target_len
@@ -375,7 +376,7 @@ class Gan(Model):
             gen1 = self.netG.forward(input_G).detach()
         else:
             gen1 = None
-        out = self.netD.forward([self.input, self.target, gen1])
+        out = self.netD.forward([self.input, self.target, gen1]) # p_real
 
         self.noise.data.normal_(0, 1)
         # this is need to plot generations at test time (debugging)
